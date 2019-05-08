@@ -12,22 +12,18 @@ book_div = "mod type02_m012 clearfix"
 
 def fetch_books_info(url, kind, dump_files=False, show_info=True):
     html = requests.get(url).text
+    
     soup = BeautifulSoup(html, "html.parser")
-    try:
-        pages = int(soup.select(".cnt_page span")[0].text)
-        print(" Total: ", pages, " pages")
-        dumps = []
-        for page in range(1, pages+1):
-            pageurl = url + "&page=" + str(page).strip()
-            print(" The", page, " page", pageurl)
-            dump = fetch_page(pageurl, kind, dump_files, show_info)
-            dumps += dump
-        if dump_files is True:
-            return dumps
-    except:
-        dump = fetch_page(url, kind, dump_files, show_info)
-        if dump_files is True:
-            return dump
+    pages = int(soup.select(".cnt_page span")[0].text)
+    print(" Total: ", pages, " pages")
+    dumps = []
+    for page in range(1, pages+1):
+        pageurl = url + "&page=" + str(page).strip()
+        print(" The", page, " page", pageurl)
+        dump = fetch_page(pageurl, kind, dump_files, show_info)
+        dumps += dump
+    if dump_files is True:
+        return dumps
 
 def fetch_page(url, kind, dump_files=False, show_info=True):
     html = requests.get(url).text
@@ -45,6 +41,8 @@ def fetch_page(url, kind, dump_files=False, show_info=True):
         date = msg.find("span").text.split("：")[-1]
         onsale = item.select(".price .set2")[0].text
         content = item.select(".txt_cont")[0].text.replace(" ","").strip()
+        list_data = [kind, title, imgurl, author, publish, date, onsale, content]
+        dump.append(list_data)
         if show_info is True:
             print("\n分類:" + kind)
             print("書名:" + title)
@@ -54,12 +52,10 @@ def fetch_page(url, kind, dump_files=False, show_info=True):
             print("出版日期:" + date)
             print("優惠價:" + onsale)
             print("內容:" + content)
-            list_data = [kind, title, imgurl, author, publish, date, onsale, content]
-            dump.append(list_data)
-    
     if dump_files is True:
         return dump
-    return
+    else:
+        return None
 
 def save_dumps(filename, dump):
     workbook = openpyxl.Workbook()
